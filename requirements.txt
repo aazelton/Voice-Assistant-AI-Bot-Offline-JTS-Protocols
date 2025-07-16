@@ -1,0 +1,37 @@
+# Core AI & ML
+pdfplumber
+sentence-transformers
+faiss-cpu
+torch
+llama-cpp-python
+numpy
+transformers
+
+# Audio Processing
+pyaudio
+speech_recognition
+vosk
+sounddevice
+webrtcvad
+
+# Voice Synthesis
+google-cloud-texttospeech
+google-generativeai
+espeak-ng
+pyttsx3
+gTTS
+
+# System Management
+psutil
+configparser
+python-dotenv
+requests
+
+# Wake Word Detection
+pvporcupine
+snowboy
+
+# Utilities
+pydub
+librosa
+scipy
