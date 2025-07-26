@@ -10,6 +10,14 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import *
 from scripts.utils import extract_chunks_from_pdf, save_docs_text
 
+# Verify that PDFS_DIR is defined
+if 'PDFS_DIR' not in globals():
+    print("Error: PDFS_DIR not found in config. Using default 'pdfs/' directory.")
+    PDFS_DIR = "pdfs/"
+
+print(f"Using PDFS_DIR: {PDFS_DIR}")
+print(f"PDFS_DIR exists: {os.path.exists(PDFS_DIR)}")
+
 model = SentenceTransformer('all-MiniLM-L6-v2')
 all_chunks, metadata = [], []
 
