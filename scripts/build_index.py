@@ -18,29 +18,61 @@ if 'PDFS_DIR' not in globals():
 print(f"Using PDFS_DIR: {PDFS_DIR}")
 print(f"PDFS_DIR exists: {os.path.exists(PDFS_DIR)}")
 
+# Check if there are any files to process
+pdf_files = [f for f in os.listdir(PDFS_DIR) if f.endswith('.pdf')]
+txt_files = [f for f in os.listdir(PDFS_DIR) if f.endswith('.txt')]
+
+print(f"Found {len(pdf_files)} PDF files: {pdf_files}")
+print(f"Found {len(txt_files)} TXT files: {txt_files}")
+
+if not pdf_files and not txt_files:
+    print("No PDF or TXT files found in PDFS_DIR. Please add some files and try again.")
+    sys.exit(1)
+
 model = SentenceTransformer('all-MiniLM-L6-v2')
 all_chunks, metadata = [], []
 
 for file in os.listdir(PDFS_DIR):
     if file.endswith(".pdf"):
         path = os.path.join(PDFS_DIR, file)
-        chunks = extract_chunks_from_pdf(path)
-        for chunk, page in chunks:
-            all_chunks.append(chunk)
-            metadata.append({"file": file, "page": page})
+        print(f"Processing PDF: {file}")
+        try:
+            chunks = extract_chunks_from_pdf(path)
+            for chunk, page in chunks:
+                all_chunks.append(chunk)
+                metadata.append({"file": file, "page": page})
+        except Exception as e:
+            print(f"Error processing {file}: {e}")
     elif file.endswith(".txt"):
         # Handle text files for testing
         path = os.path.join(PDFS_DIR, file)
-        with open(path, 'r') as f:
-            content = f.read()
-            # Split into chunks
-            chunk_size = 512
-            for i in range(0, len(content), chunk_size):
-                chunk = content[i:i+chunk_size]
-                all_chunks.append(chunk)
-                metadata.append({"file": file, "page": i//chunk_size + 1})
+        print(f"Processing TXT: {file}")
+        try:
+            with open(path, 'r') as f:
+                content = f.read()
+                # Split into chunks
+                chunk_size = 512
+                for i in range(0, len(content), chunk_size):
+                    chunk = content[i:i+chunk_size]
+                    all_chunks.append(chunk)
+                    metadata.append({"file": file, "page": i//chunk_size + 1})
+        except Exception as e:
+            print(f"Error processing {file}: {e}")
 
+print(f"Total chunks extracted: {len(all_chunks)}")
+
+if not all_chunks:
+    print("No text chunks were extracted. Please check your PDF/TXT files.")
+    sys.exit(1)
+
+print("Encoding chunks...")
 embeds = model.encode(all_chunks)
+print(f"Embeddings shape: {embeds.shape}")
+
+if embeds.shape[0] == 0:
+    print("No embeddings were created. Please check your input files.")
+    sys.exit(1)
+
 index = faiss.IndexFlatL2(embeds.shape[1])
 index.add(np.array(embeds))
 
@@ -51,3 +83,8 @@ with open(METADATA_PATH, "w") as f:
     json.dump(metadata, f)
 
 save_docs_text(all_chunks, DOCS_PATH)
+
+print(f"Successfully created index with {len(all_chunks)} chunks")
+print(f"Index saved to: {EMBEDDINGS_PATH}")
+print(f"Metadata saved to: {METADATA_PATH}")
+print(f"Docs saved to: {DOCS_PATH}")
