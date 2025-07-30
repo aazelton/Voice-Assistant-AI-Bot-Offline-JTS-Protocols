@@ -1,330 +1,224 @@
-# Voice Assistant AI Bot (Offline JTS Protocols)
+# Trauma Assistant - Voice-Activated Clinical Decision Support
 
-A fully offline-capable voice assistant for answering clinical treatment questions using the Joint Trauma System (JTS) guideline PDFs, designed specifically for Raspberry Pi 4 deployment with Gemini Voice integration.
+A voice-assisted AI bot for rapid clinical decision support using Joint Trauma System (JTS) Clinical Practice Guidelines. Designed to run on Raspberry Pi 4 with offline capabilities and cloud development support.
 
-## 🎤 Features
+## 🚀 Quick Start
 
-### Voice Interaction
-- **Wake Word Detection**: "Hey Assistant" activation
-- **Speech Recognition**: Google Speech Recognition (online) + Vosk (offline fallback)
-- **Natural Voice Output**: Gemini Voice API + eSpeak-ng fallback
-- **Real-time Audio Processing**: Low-latency voice interaction
+### Mac Development Setup
+```bash
+# Clone and setup
+git clone <your-repo>
+cd trauma-assistant
+python3 setup_mac.py
 
-### AI & Knowledge Base
-- **Local LLM Processing**: Mistral 7B (quantized GGUF format)
-- **Vector Search**: FAISS-based semantic search
-- **Medical Knowledge**: JTS clinical guidelines and protocols
-- **Context-Aware Responses**: Relevant document retrieval
+# Test locally (fast iteration)
+python3 scripts/local_test.py
 
-### System Features
-- **Fully Offline**: Works without internet connection
-- **Raspberry Pi 4 Optimized**: ARM64 architecture support
-- **Auto-start Capability**: Systemd service integration
-- **Performance Monitoring**: CPU, memory, temperature tracking
-- **Security**: Local data processing, no cloud storage
+# Deploy to VM (one command)
+./scripts/quick_deploy.sh
+```
+
+### Raspberry Pi 4 Setup
+```bash
+# Automated setup
+python3 setup.py
+
+# Run voice assistant
+python3 voice_assistant.py
+```
+
+## 🔄 Streamlined Development Workflow
+
+### **Option 1: Local Development + Remote Testing (Recommended)**
+
+**Mac (Development):**
+```bash
+# Fast local testing without full model
+python3 scripts/local_test.py
+
+# Edit code, then deploy with one command
+./scripts/quick_deploy.sh
+```
+
+**VM (Testing):**
+```bash
+# Automatically pulls latest changes
+# Runs full model inference
+python3 scripts/ask_fast.py
+```
+
+### **Option 2: Python Workflow Script**
+```bash
+# Interactive deployment
+python3 scripts/dev_workflow.py
+```
+
+### **Option 3: Manual Git Workflow**
+```bash
+# On Mac
+git add .
+git commit -m "Update prompt engineering"
+git push
+
+# On VM
+git pull
+python3 scripts/ask_fast.py
+```
 
 ## 🏗️ Architecture
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Voice Input   │───▶│  Speech-to-Text │───▶│  Query Analysis │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                                       │
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Knowledge     │◀───│  Context        │◀───│  Vector Search  │
-│   Base          │    │  Retrieval      │    │  (FAISS)        │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                                       │
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Voice Output  │◀───│  Text-to-Speech │◀───│  LLM Response   │
-│   (Speaker)     │    │  (Gemini Voice) │    │  Generation     │
+│   Mac (Dev)     │    │   VM (Test)     │    │   Pi 4 (Prod)   │
+│                 │    │                 │    │                 │
+│ • Fast editing  │───▶│ • Full model    │───▶│ • Edge deploy   │
+│ • Local tests   │    │ • Performance   │    │ • Offline       │
+│ • Git push      │    │ • Validation    │    │ • Voice I/O     │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-## 🛠️ Hardware Requirements
+## 📁 Project Structure
 
-### Raspberry Pi 4 Specifications
-- **Model**: Raspberry Pi 4B (4GB or 8GB RAM recommended)
-- **Storage**: 64GB+ microSD card (Class 10, A2)
-- **Audio**: USB microphone or Pi HAT microphone
-- **Speaker**: USB speaker or 3.5mm audio output
-- **Cooling**: Active cooling recommended for sustained LLM processing
-
-### Performance Considerations
-- **CPU**: ARM Cortex-A72 quad-core (1.5GHz)
-- **Memory**: 4-8GB LPDDR4
-- **Storage**: SSD recommended for faster I/O
-- **Network**: WiFi 5GHz or Ethernet for online features
-
-## 🚀 Quick Setup
-
-### Mac Development Setup
-```bash
-# Clone the repository
-git clone <repository-url>
-cd trauma-assistant
-
-# Run the Mac development setup script
-python3 setup_mac.py
 ```
-
-### Raspberry Pi Production Setup
-```bash
-# SSH into your Raspberry Pi
-ssh pi@your-pi-ip-address
-
-# Clone the repository
-git clone <repository-url>
-cd trauma-assistant
-
-# Run the automated setup script
-python3 setup.py
-```
-
-### 2. Manual Setup
-```bash
-# Install system dependencies
-sudo apt-get update
-sudo apt-get install -y python3-pip python3-venv portaudio19-dev espeak-ng mpg123
-
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate
-
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Create necessary directories
-mkdir -p models pdfs embeds logs cache
-```
-
-### 3. Configuration
-```bash
-# The .env file is created automatically by setup.py
-# Edit the configuration if needed
-nano .env
-```
-
-### 4. Model Setup
-```bash
-# Download Mistral model (example)
-wget https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GGUF/resolve/main/mistral-7b-instruct-v0.2.Q4_K_M.gguf -O models/mistral.Q4_K_M.gguf
-
-# Place your PDF documents in pdfs/ directory
-cp your_medical_documents.pdf pdfs/
-
-# Build the knowledge base index
-python3 scripts/build_index.py
-```
-
-### 5. Run the Voice Assistant
-```bash
-# Start the voice assistant
-./start_voice_assistant.sh
-
-# Or run directly
-python3 voice_assistant.py
+trauma-assistant/
+├── config.py                 # Centralized configuration
+├── voice_assistant.py        # Main voice assistant
+├── setup.py                  # Pi 4 setup script
+├── setup_mac.py             # Mac development setup
+├── scripts/
+│   ├── ask_fast.py          # Optimized Q&A (VM/Pi)
+│   ├── local_test.py        # Local testing (Mac)
+│   ├── build_index.py       # Build knowledge base
+│   ├── dev_workflow.py      # Development workflow
+│   └── quick_deploy.sh      # One-command deployment
+├── pdfs/                    # JTS CPG documents
+├── models/                  # LLM models
+├── embeds/                  # Vector embeddings
+└── requirements.txt         # Dependencies
 ```
 
 ## ⚙️ Configuration
 
-### Environment Variables (.env)
+### Environment Variables
 ```bash
-# Gemini Voice Configuration
-GEMINI_VOICE_API_KEY=your_gemini_api_key_here
-GEMINI_VOICE_MODEL=gemini-1.5-flash
-GEMINI_VOICE_VOICE_ID=medical-professional
-
-# Audio Configuration
-AUDIO_SAMPLE_RATE=16000
-AUDIO_CHANNELS=1
-AUDIO_CHUNK_SIZE=1024
-
-# Wake Word Configuration
-WAKE_WORD=Hey Assistant
-WAKE_WORD_SENSITIVITY=0.5
-
-# TTS Configuration
-TTS_ENGINE=gemini  # gemini, espeak, pyttsx3, gtts
-TTS_VOICE=en-us
-TTS_RATE=150
-TTS_VOLUME=1.0
-
-# LLM Configuration
-LLM_MAX_TOKENS=150
-LLM_TEMPERATURE=0.7
-LLM_CONTEXT_WINDOW=4096
+# .env file
+GEMINI_API_KEY=your_api_key
+VM_IP=your_vm_ip
+VM_USER=akaclinicalco
 ```
 
-## 🎯 Usage
-
-### Voice Commands
-1. **Activate**: Say "Hey Assistant"
-2. **Ask Questions**: Speak your medical query naturally
-3. **Examples**:
-   - "What is the treatment for hemorrhagic shock?"
-   - "How do I manage a tension pneumothorax?"
-   - "What are the signs of compartment syndrome?"
-
-### Text Interface (Alternative)
-```bash
-# Run text-based interface
-python3 scripts/ask.py
-```
-
-## 🔧 Advanced Configuration
-
-### Auto-start on Boot
-```bash
-# Enable systemd service
-sudo cp voice-assistant.service /etc/systemd/system/
-sudo systemctl enable voice-assistant.service
-sudo systemctl start voice-assistant.service
-
-# Check status
-sudo systemctl status voice-assistant.service
-```
-
-### Performance Optimization
-```bash
-# Set CPU governor to performance
-echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
-
-# Monitor system resources
-htop
-```
-
-### Custom Wake Words
-```bash
-# Edit wake word in .env
-WAKE_WORD=Your Custom Wake Word
-```
-
-## 📊 Monitoring & Logs
-
-### Log Files
-- **Main Log**: `logs/voice_assistant.log`
-- **System Logs**: `sudo journalctl -u voice-assistant.service`
-
-### Performance Monitoring
-```bash
-# Check CPU temperature
-vcgencmd measure_temp
-
-# Monitor memory usage
-free -h
-
-# Check disk space
-df -h
-```
-
-## 🔒 Security & Privacy
-
-### Data Protection
-- **Local Processing**: All sensitive data processed locally
-- **No Cloud Storage**: No medical data transmitted to cloud
-- **Encryption**: Local file encryption for stored documents
-- **Access Control**: User authentication for system access
-
-### Network Security
-- **Firewall**: UFW configuration for minimal network exposure
-- **VPN**: Optional VPN for secure remote access
-- **SSL/TLS**: Encrypted communication for online features
-- **API Keys**: Secure storage of Gemini Voice API credentials
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-#### Audio Problems
-```bash
-# Check audio devices
-aplay -l
-arecord -l
-
-# Test microphone
-arecord -D hw:1,0 -f S16_LE -r 16000 -c 1 test.wav
-aplay test.wav
-```
-
-#### Model Loading Issues
-```bash
-# Check model file
-ls -la models/
-
-# Verify model integrity
-file models/mistral.Q4_K_M.gguf
-```
-
-#### Performance Issues
-```bash
-# Monitor system resources
-htop
-iostat 1
-
-# Check temperature
-vcgencmd measure_temp
-```
-
-### Debug Mode
-```bash
-# Enable debug logging
-export LOG_LEVEL=DEBUG
-python3 voice_assistant.py
-```
-
-## 📚 API Reference
-
-### VoiceAssistant Class
+### Performance Settings
 ```python
-from voice_assistant import VoiceAssistant
-
-# Initialize
-assistant = VoiceAssistant()
-
-# Process query
-response = assistant.process_query("What is hemorrhagic shock?")
-
-# Run main loop
-assistant.run()
+# config.py
+LLM_PARAMS = {
+    'n_ctx': 256,           # Context window
+    'n_batch': 1,           # Batch size
+    'n_threads': 2,         # CPU threads
+    'max_tokens': 50,       # Response length
+    'temperature': 0.0      # Deterministic
+}
 ```
 
-### Configuration Functions
-```python
-from config import *
+## 🧪 Testing Strategy
 
-# Access configuration
-print(MODEL_PATH)
-print(TTS_ENGINE)
-print(WAKE_WORD)
+### **Mac (Fast Iteration)**
+- ✅ Config loading
+- ✅ Embeddings validation
+- ✅ Prompt engineering
+- ✅ Audio components
+- ❌ Full model inference (too slow)
+
+### **VM (Performance Testing)**
+- ✅ Full model loading
+- ✅ Vector search
+- ✅ Response generation
+- ✅ Medical accuracy
+
+### **Pi 4 (Production)**
+- ✅ Voice interaction
+- ✅ Offline operation
+- ✅ Real-world testing
+
+## 🚀 Deployment Commands
+
+### **Quick Deploy (Recommended)**
+```bash
+# Set your VM IP
+export VM_IP=your_vm_ip
+
+# Deploy with one command
+./scripts/quick_deploy.sh
 ```
+
+### **Manual Deployment**
+```bash
+# On Mac
+git add .
+git commit -m "Update"
+git push
+
+# On VM
+ssh akaclinicalco@your-vm-ip
+cd ~/Voice-Assistant-AI-Bot-Offline-JTS-Protocols
+git pull
+source venv/bin/activate
+python3 scripts/ask_fast.py
+```
+
+## 📊 Performance Comparison
+
+| Platform | Model Load | Response Time | Best For |
+|----------|------------|---------------|----------|
+| **Mac** | 30-60s | 10-30s | Development |
+| **VM** | 10-20s | 2-5s | Testing |
+| **Pi 4** | 15-30s | 3-8s | Production |
+
+## 🔧 Troubleshooting
+
+### **Common Issues**
+
+**Mac Development:**
+```bash
+# Module not found
+pip install -r requirements.txt
+
+# Audio issues
+brew install portaudio espeak mpg123
+```
+
+**VM Testing:**
+```bash
+# Git not updating
+git fetch --all
+git reset --hard origin/main
+
+# Model too slow
+python3 scripts/ask_fast.py  # Use optimized version
+```
+
+**Pi 4 Production:**
+```bash
+# Memory issues
+sudo raspi-config  # Increase swap
+# Or use smaller model
+```
+
+## 📈 Next Steps
+
+1. **Optimize prompts** for medical accuracy
+2. **Test on Pi 4** with real hardware
+3. **Add voice wake word** detection
+4. **Implement offline TTS** fallback
+5. **Deploy to production** environment
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🙏 Acknowledgments
-
-- **Joint Trauma System (JTS)** for clinical guidelines
-- **Mistral AI** for the language model
-- **Google** for Gemini Voice API
-- **Raspberry Pi Foundation** for the hardware platform
-
-## 📞 Support
-
-For support and questions:
-- Create an issue on GitHub
-- Check the troubleshooting section
-- Review the logs for error details
+1. Edit code on Mac
+2. Test locally: `python3 scripts/local_test.py`
+3. Deploy to VM: `./scripts/quick_deploy.sh`
+4. Validate performance
+5. Deploy to Pi 4
 
 ---
 
-**Note**: This system is designed for educational and research purposes. Always consult with qualified medical professionals for clinical decision-making.
+**Goal**: Simple but practical voice assistant for rapid clinical decision support on edge devices.

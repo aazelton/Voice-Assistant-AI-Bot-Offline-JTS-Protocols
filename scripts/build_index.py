@@ -37,10 +37,10 @@ for file in os.listdir(PDFS_DIR):
         path = os.path.join(PDFS_DIR, file)
         print(f"Processing PDF: {file}")
         try:
-            chunks = extract_chunks_from_pdf(path)
-            for chunk, page in chunks:
-                all_chunks.append(chunk)
-                metadata.append({"file": file, "page": page})
+    chunks = extract_chunks_from_pdf(path)
+    for chunk, page in chunks:
+        all_chunks.append(chunk)
+        metadata.append({"file": file, "page": page})
         except Exception as e:
             print(f"Error processing {file}: {e}")
     elif file.endswith(".txt"):
