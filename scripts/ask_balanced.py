@@ -80,16 +80,31 @@ def search_context(question, model, index, metadata, top_k=3):
         # Search the index
         distances, indices = index.search(question_embedding, top_k)
         
-        # Get relevant chunks - fix the metadata access
+        # Get relevant chunks - handle different metadata structures
         relevant_chunks = []
-        for idx in indices[0]:
-            if idx < len(metadata.get('chunks', [])):
-                relevant_chunks.append(metadata['chunks'][idx])
+        
+        # Check if metadata is a list or dict
+        if isinstance(metadata, list):
+            # If metadata is a list, use it directly
+            for idx in indices[0]:
+                if idx < len(metadata):
+                    relevant_chunks.append(metadata[idx])
+        elif isinstance(metadata, dict) and 'chunks' in metadata:
+            # If metadata is a dict with chunks
+            for idx in indices[0]:
+                if idx < len(metadata['chunks']):
+                    relevant_chunks.append(metadata['chunks'][idx])
+        else:
+            print(f"❌ Unknown metadata structure: {type(metadata)}")
+            return []
         
         return relevant_chunks
         
     except Exception as e:
         print(f"❌ Search failed: {e}")
+        print(f"   Metadata type: {type(metadata)}")
+        if isinstance(metadata, dict):
+            print(f"   Metadata keys: {list(metadata.keys())}")
         return []
 
 def generate_response(question, context_chunks, llm):
