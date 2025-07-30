@@ -2,6 +2,9 @@
 
 A voice-assisted AI bot for rapid clinical decision support using Joint Trauma System (JTS) Clinical Practice Guidelines. Designed to run on Raspberry Pi 4 with offline capabilities and cloud development support.
 
+🚧 Not for Clinical Use
+This is a proof-of-concept project for exploration and learning. It’s not certified or approved for clinical decision-making. Please don’t use it for actual patient care.
+
 ## 🚀 Quick Start
 
 ### Mac Development Setup
