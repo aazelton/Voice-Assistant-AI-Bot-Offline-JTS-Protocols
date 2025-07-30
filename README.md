@@ -124,7 +124,7 @@ trauma-assistant/
 # .env file
 GEMINI_API_KEY=your_api_key
 VM_IP=your_vm_ip
-VM_USER=akaclinicalco
+VM_USER=
 ```
 
 ### Performance Settings
