@@ -80,10 +80,10 @@ def search_context(question, model, index, metadata, top_k=3):
         # Search the index
         distances, indices = index.search(question_embedding, top_k)
         
-        # Get relevant chunks
+        # Get relevant chunks - fix the metadata access
         relevant_chunks = []
         for idx in indices[0]:
-            if idx < len(metadata['chunks']):
+            if idx < len(metadata.get('chunks', [])):
                 relevant_chunks.append(metadata['chunks'][idx])
         
         return relevant_chunks
