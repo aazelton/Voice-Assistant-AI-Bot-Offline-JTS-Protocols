@@ -136,11 +136,59 @@ def get_protocol_topics(clinical_info):
     
     return topics
 
+def get_current_topic(conversation_history):
+    """Extract current topic from conversation history"""
+    if not conversation_history:
+        return None
+    
+    # Look for topic keywords in recent conversation
+    recent_text = " ".join([msg.get("question", "").lower() + " " + msg.get("response", "").lower() 
+                           for msg in conversation_history[-3:]])
+    
+    topics = {
+        'snake': ['snake', 'envenomation', 'bite'],
+        'burn': ['burn', 'thermal'],
+        'trauma': ['trauma', 'injury', 'fracture'],
+        'medication': ['ketamine', 'txa', 'fentanyl', 'morphine', 'medication']
+    }
+    
+    for topic, keywords in topics.items():
+        if any(keyword in recent_text for keyword in keywords):
+            return topic
+    
+    return None
+
 def generate_interactive_response(question, clinical_info, conversation_history=None):
     """Generate interactive response with protocol guidance"""
     try:
         question_lower = question.lower()
         weight = extract_weight(question)
+        current_topic = get_current_topic(conversation_history or [])
+        
+        # Handle short responses with context
+        if len(question.split()) <= 2 and current_topic:
+            if current_topic == 'snake':
+                if 'treatment' in question_lower:
+                    return "Snake bite treatment: Immobilize limb, mark swelling progression, IV access, pain control, antivenom if indicated."
+                elif 'assessment' in question_lower:
+                    return "Snake bite assessment: Check airway, breathing, circulation. Look for fang marks, swelling, pain. Monitor for systemic symptoms (nausea, weakness, bleeding)."
+                elif 'antivenom' in question_lower:
+                    return "Snake bite antivenom: Administer based on severity. Monitor for allergic reactions. Keep patient for observation."
+                elif 'monitoring' in question_lower:
+                    return "Snake bite monitoring: Vital signs q15min, swelling progression, neuro status, coagulation studies, renal function."
+                else:
+                    return "Snake bite protocol. What do you need?\n- Assessment\n- Treatment\n- Antivenom\n- Monitoring"
+            
+            elif current_topic == 'burn':
+                if 'treatment' in question_lower:
+                    return "Burn treatment: Cool burn, remove jewelry, cover with clean dressing, pain control, fluid resuscitation if needed."
+                elif 'assessment' in question_lower:
+                    return "Burn assessment: Calculate TBSA, depth, location. Check for inhalation injury, associated trauma."
+                elif 'fluid' in question_lower:
+                    base_formula = "Parkland formula: 4ml × TBSA% × weight(kg) over 24h"
+                    if weight:
+                        return f"{base_formula}\nFor {weight}kg patient: Calculate based on TBSA%"
+                    return base_formula
         
         # Handle complex topics that need protocol guidance
         if any(topic in question_lower for topic in ['snake', 'envenomation', 'bite']):
