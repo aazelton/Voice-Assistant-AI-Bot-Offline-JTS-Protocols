@@ -7,15 +7,29 @@ This is a proof-of-concept project for exploration and learning. It’s not cert
 
 ## 🚀 Quick Start
 
-### Mac Development Setup
+### Step 1: Get JTS Clinical Practice Guidelines
+```bash
+# Download JTS PDFs (required for the system to work)
+python3 scripts/download_jts_pdfs.py
+
+# This will guide you through:
+# 1. Manual download from JTS website (recommended)
+# 2. Auto-download attempt (limited)
+# 3. Sample files for testing
+```
+
+### Step 2: Mac Development Setup
 ```bash
 # Clone and setup
 git clone <your-repo>
 cd trauma-assistant
 python3 setup_mac.py
 
+# Build the knowledge base
+python3 scripts/build_index.py
+
 # Test locally (fast iteration)
-python3 scripts/local_test.py
+python3 scripts/ask_conversational.py
 
 # Deploy to VM (one command)
 ./scripts/quick_deploy.sh
@@ -89,12 +103,15 @@ trauma-assistant/
 ├── setup.py                  # Pi 4 setup script
 ├── setup_mac.py             # Mac development setup
 ├── scripts/
-│   ├── ask_fast.py          # Optimized Q&A (VM/Pi)
-│   ├── local_test.py        # Local testing (Mac)
-│   ├── build_index.py       # Build knowledge base
-│   ├── dev_workflow.py      # Development workflow
-│   └── quick_deploy.sh      # One-command deployment
-├── pdfs/                    # JTS CPG documents
+│   ├── download_jts_pdfs.py  # JTS PDF downloader
+│   ├── build_index.py        # Build FAISS knowledge base
+│   ├── ask_conversational.py # Human-like clinical assistant
+│   ├── ask_cloud.py          # Cloud-enhanced assistant
+│   ├── ask_fast.py           # Optimized Q&A (VM/Pi)
+│   ├── local_test.py         # Local testing (Mac)
+│   ├── dev_workflow.py       # Development workflow
+│   └── quick_deploy.sh       # One-command deployment
+├── pdfs/                     # JTS Clinical Practice Guidelines (80+ PDFs)
 ├── models/                  # LLM models
 ├── embeds/                  # Vector embeddings
 └── requirements.txt         # Dependencies
@@ -205,6 +222,37 @@ python3 scripts/ask_fast.py  # Use optimized version
 sudo raspi-config  # Increase swap
 # Or use smaller model
 ```
+
+## 📚 JTS Clinical Practice Guidelines
+
+The system uses **Joint Trauma System (JTS) Clinical Practice Guidelines** as its knowledge base:
+
+- **80+ PDF files** covering trauma protocols
+- **~100MB total** when downloaded
+- **Official military medical guidelines**
+- **Updated regularly** by JTS
+
+### Getting the PDFs:
+```bash
+# Run the downloader script
+python3 scripts/download_jts_pdfs.py
+
+# Options:
+# 1. Manual download from JTS website (recommended)
+# 2. Auto-download attempt (limited availability)
+# 3. Sample files for testing
+```
+
+**Note**: JTS PDFs are not included in the GitHub repository due to size and licensing. Users must download them separately.
+
+### Expected PDF Files:
+- `Acute_Coronary_Syndrome_14_May_2021_ID86.pdf`
+- `Airway_Management_of_Traumatic_Injuries_17_Jul_2017_ID39.pdf`
+- `Burn_Care_CPG_10_June_2025_ID12.pdf`
+- `Damage_Control_Resuscitation_12_Jul_2019_ID18.pdf`
+- `Ketamine_Protocol_Management_15_Mar_2024_ID88.pdf`
+- `TXA_Tranexamic_Acid_Protocol_22_Jan_2025_ID99.pdf`
+- ... and 70+ more protocols
 
 ## 📈 Next Steps
 
