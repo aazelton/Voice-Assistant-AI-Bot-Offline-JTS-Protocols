@@ -9,7 +9,7 @@ transformers
 
 # Audio Processing
 pyaudio
-speech_recognition
+SpeechRecognition
 vosk
 sounddevice
 webrtcvad
