@@ -178,7 +178,7 @@ git commit -m "Update"
 git push
 
 # On VM
-ssh akaclinicalco@your-vm-ip
+ssh you@your-vm-ip
 cd ~/Voice-Assistant-AI-Bot-Offline-JTS-Protocols
 git pull
 source venv/bin/activate
