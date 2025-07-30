@@ -110,8 +110,25 @@ def search_context(question, model, index, metadata, top_k=3):
 def generate_response(question, context_chunks, llm):
     """Generate medical response"""
     try:
+        # Handle context chunks - they might be dictionaries or strings
+        context_parts = []
+        for chunk in context_chunks[:2]:  # Use top 2 chunks
+            if isinstance(chunk, dict):
+                # If chunk is a dictionary, extract the text content
+                if 'text' in chunk:
+                    context_parts.append(chunk['text'])
+                elif 'content' in chunk:
+                    context_parts.append(chunk['content'])
+                else:
+                    # If no clear text field, convert dict to string
+                    context_parts.append(str(chunk))
+            elif isinstance(chunk, str):
+                context_parts.append(chunk)
+            else:
+                context_parts.append(str(chunk))
+        
         # Create context from chunks
-        context = "\n".join(context_chunks[:2])  # Use top 2 chunks
+        context = "\n".join(context_parts)
         
         # Medical prompt template
         prompt = f"""You are a clinical decision support assistant. Answer the following medical question based on Joint Trauma System (JTS) Clinical Practice Guidelines.
@@ -144,6 +161,10 @@ Answer:"""
         
     except Exception as e:
         print(f"❌ Response generation failed: {e}")
+        print(f"   Context chunks type: {type(context_chunks)}")
+        if context_chunks:
+            print(f"   First chunk type: {type(context_chunks[0])}")
+            print(f"   First chunk: {context_chunks[0]}")
         return "I'm sorry, I couldn't generate a response at this time."
 
 def main():
