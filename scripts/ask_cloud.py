@@ -307,6 +307,10 @@ def main():
     print("=" * 45)
     print("Loading components...")
     
+    # Load environment variables
+    from dotenv import load_dotenv
+    load_dotenv()
+    
     # Load components
     model, index, metadata = load_embeddings()
     if not model or not index or not metadata:
