@@ -21,6 +21,9 @@ espeak-ng
 pyttsx3
 gTTS
 
+# Cloud APIs
+openai
+
 # System Management
 psutil
 configparser
