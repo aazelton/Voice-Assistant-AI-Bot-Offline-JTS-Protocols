@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Conversational Clinical Assistant - Human-like medical guidance
-Feels like talking to a knowledgeable colleague
+Direct Clinical Assistant - Concise but conversational medical guidance
+Optimized for quick, actionable responses
 """
 
 import os
@@ -107,50 +107,32 @@ def search_clinical_info(question, model, index, metadata, top_k=3):
         return []
 
 def extract_weight(question):
-    """Extract patient weight from question"""
-    weight_patterns = [
-        r'(\d+)\s*kg',
-        r'(\d+)\s*kilo',
-        r'(\d+)\s*pound',
-        r'(\d+)\s*lb',
-        r'(\d+)\s*kg\s*pt',
-        r'(\d+)\s*kg\s*patient'
-    ]
-    
-    for pattern in weight_patterns:
-        match = re.search(pattern, question.lower())
-        if match:
-            weight = float(match.group(1))
-            if 'pound' in question.lower() or 'lb' in question.lower():
-                weight = weight * 0.453592
-            return weight
+    """Extract weight from question"""
+    weight_match = re.search(r'(\d+(?:\.\d+)?)\s*kg', question.lower())
+    if weight_match:
+        return float(weight_match.group(1))
     return None
 
 def calculate_dosage(base_dosage, weight):
-    """Calculate actual dosage based on weight"""
+    """Calculate dosage based on weight"""
     try:
-        numbers = re.findall(r'\d+(?:\.\d+)?', base_dosage)
+        # Extract numbers from dosage string
+        numbers = re.findall(r'(\d+(?:\.\d+)?)', base_dosage)
         if len(numbers) >= 2:
-            min_dose = float(numbers[0])
-            max_dose = float(numbers[1])
-            
-            min_total = min_dose * weight
-            max_total = max_dose * weight
-            
-            min_total = round(min_total, 1)
-            max_total = round(max_total, 1)
-            
-            return f"{min_total}-{max_total}mg"
+            min_dose = float(numbers[0]) * weight
+            max_dose = float(numbers[1]) * weight
+            unit = re.search(r'(mg|mcg|ml|g)', base_dosage).group(1)
+            return f"{min_dose:.1f}-{max_dose:.1f}{unit}"
         elif len(numbers) == 1:
             dose = float(numbers[0]) * weight
-            dose = round(dose, 1)
-            return f"{dose}mg"
+            unit = re.search(r'(mg|mcg|ml|g)', base_dosage).group(1)
+            return f"{dose:.1f}{unit}"
     except:
         pass
     return base_dosage
 
-def get_conversational_response(question, clinical_info, apis, conversation_history=None):
-    """Get conversational response from cloud APIs"""
+def get_direct_response(question, clinical_info, apis, conversation_history=None):
+    """Get direct, concise response from cloud APIs"""
     try:
         # Prepare context from clinical info
         context = " ".join(clinical_info[:2]) if clinical_info else "No specific clinical data available."
@@ -158,20 +140,18 @@ def get_conversational_response(question, clinical_info, apis, conversation_hist
         # Create conversation history
         history = ""
         if conversation_history:
-            recent = conversation_history[-3:]  # Last 3 exchanges
+            recent = conversation_history[-2:]  # Last 2 exchanges only
             for msg in recent:
                 history += f"User: {msg.get('question', '')}\nAssistant: {msg.get('response', '')}\n"
         
-        # Create direct conversational prompt
-        prompt = f"""You are an experienced trauma provider giving quick, direct advice to a colleague. Be conversational but concise. Give actionable answers in 1-2 sentences.
-
-Use the JTS Clinical Practice Guidelines as your knowledge base.
+        # Create direct, concise prompt
+        prompt = f"""You are an experienced trauma provider giving quick, direct advice to a colleague. Be concise but conversational. Give actionable answers in 1-2 sentences.
 
 Context from JTS guidelines: {context}
 
 {history}User: {question}
 
-Respond with direct, actionable advice. Be conversational but focused. Give the key information needed quickly."""
+Respond with direct, actionable advice. Be concise but friendly. Focus on the key information needed."""
 
         # Try Gemini first, then OpenAI
         if 'gemini' in apis:
@@ -187,24 +167,24 @@ Respond with direct, actionable advice. Be conversational but focused. Give the 
                     {"role": "system", "content": "You are an experienced trauma provider. Give direct, concise advice in 1-2 sentences."},
                     {"role": "user", "content": f"Context: {context}\n\nQuestion: {question}"}
                 ],
-                max_tokens=100,
-                temperature=0.3
+                max_tokens=100,  # Shorter responses
+                temperature=0.3   # More focused
             )
             return response.choices[0].message.content.strip()
         
         return "I'd love to help, but I'm having trouble accessing my resources right now."
         
     except Exception as e:
-        print(f"❌ Conversational response failed: {e}")
+        print(f"❌ Direct response failed: {e}")
         return "Sorry, I'm having a moment here. Let me try a different approach."
 
-def get_fast_conversational_response(question, clinical_info, conversation_history=None):
-    """Get fast conversational response for simple queries"""
+def get_fast_direct_response(question, clinical_info, conversation_history=None):
+    """Get fast, direct response for simple queries"""
     try:
         question_lower = question.lower()
         weight = extract_weight(question)
         
-        # Handle medication queries with conversational tone
+        # Handle medication queries with direct tone
         if 'ketamine' in question_lower:
             if 'rsi' in question_lower or 'induction' in question_lower:
                 base_dosage = "1-2 mg/kg IV"
@@ -235,32 +215,49 @@ def get_fast_conversational_response(question, clinical_info, conversation_histo
             else:
                 return f"Fentanyl: {base_dosage}. Start low, titrate up."
         
-        # Return conversational clinical info if available
+        elif 'rocuronium' in question_lower or 'roc' in question_lower:
+            base_dosage = "1 mg/kg IV"
+            if weight:
+                calculated_dose = calculate_dosage(base_dosage, weight)
+                return f"Rocuronium: {calculated_dose} for your {weight}kg patient. Have airway ready."
+            else:
+                return f"Rocuronium: {base_dosage}. Have airway management ready."
+        
+        elif 'side effects' in question_lower or 'lookout' in question_lower:
+            if 'ketamine' in question_lower:
+                return "Ketamine: Watch for emergence reactions, BP changes, and increased secretions. Have suction ready."
+            elif 'txa' in question_lower:
+                return "TXA: Monitor for thrombosis, seizures, and allergic reactions."
+            elif 'fentanyl' in question_lower:
+                return "Fentanyl: Watch for respiratory depression, hypotension, and chest wall rigidity."
+        
+        # Return direct clinical info if available
         if clinical_info:
             combined_text = " ".join(clinical_info)
             sentences = combined_text.split('.')
             for sentence in sentences:
                 if any(word in sentence.lower() for word in question_lower.split()):
-                    return f"Based on the protocols, {sentence.strip()[:150]}. That's what I'd go with in this situation."
+                    return f"Protocol: {sentence.strip()[:100]}."
         
-        return "I'm not finding specific info for that, but I'd be happy to help you think through it. What's the clinical scenario you're dealing with?"
+        return "I don't have specific info for that. What's the clinical scenario?"
         
     except Exception as e:
         print(f"❌ Fast response failed: {e}")
-        return "Sorry, I'm having trouble with that one. Let me know if you need help with something else!"
+        return "Sorry, I'm having trouble with that one."
 
-def should_use_conversational_api(question, clinical_info):
-    """Determine if we should use conversational API vs fast response"""
+def should_use_direct_api(question, clinical_info):
+    """Determine if we should use the direct API or fast response"""
     question_lower = question.lower()
     
     # Use fast response for:
-    # - Simple medication queries
-    # - Dosage calculations
-    # - Short questions
+    # - Simple dosage questions
+    # - Weight-based calculations
+    # - Very short questions
     fast_patterns = [
-        r'\b(ketamine|txa|fentanyl|morphine)\b',
+        r'\b(ketamine|txa|fentanyl|morphine|rocuronium|roc)\b',
         r'\b\d+\s*kg\b',
         r'\b(dose|dosage|mg|mcg)\b',
+        r'\b(side effects?|lookout)\b',
         r'^\w+\s+\w+$'  # Very short questions
     ]
     
@@ -268,11 +265,11 @@ def should_use_conversational_api(question, clinical_info):
         if re.search(pattern, question_lower):
             return False
     
-    # Use conversational API for:
+    # Use direct API for:
     # - Complex questions
     # - Protocol explanations
-    # - Conversational queries
-    conversational_patterns = [
+    # - Management questions
+    direct_patterns = [
         r'\b(how|why|what|explain|describe)\b',
         r'\b(protocol|guideline|management)\b',
         r'\b(assessment|treatment|monitoring)\b',
@@ -280,21 +277,24 @@ def should_use_conversational_api(question, clinical_info):
         r'\b(help|advice|think)\b'
     ]
     
-    for pattern in conversational_patterns:
+    for pattern in direct_patterns:
         if re.search(pattern, question_lower):
             return True
     
-    # Default to conversational if no clear pattern
+    # Default to direct if no clear pattern
     return True
 
 def main():
-    print("👨‍⚕️  CONVERSATIONAL CLINICAL ASSISTANT")
-    print("=" * 45)
+    print("👨‍⚕️  DIRECT CLINICAL ASSISTANT")
+    print("=" * 40)
     print("Loading components...")
     
     # Load environment variables
-    from dotenv import load_dotenv
-    load_dotenv()
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        print("⚠️  python-dotenv not installed - using system environment")
     
     # Load components
     model, index, metadata = load_embeddings()
@@ -305,9 +305,8 @@ def main():
     if not apis:
         print("⚠️  No cloud APIs available - using fast responses only")
     
-    print("✅ Ready! Let's talk clinical scenarios.")
-    print("💡 Ask me anything - dosages, protocols, or just bounce ideas off me")
-    print("💡 Example: 'ketamine RSI 80kg' or 'what do you think about this burn case?'")
+    print("✅ Ready! Ask for direct clinical advice.")
+    print("💡 Example: 'ketamine RSI 80kg' or 'TXA protocol'")
     print()
     
     conversation_history = []
@@ -317,7 +316,7 @@ def main():
             question = input("👨‍⚕️  You: ").strip()
             
             if question.lower() in ['quit', 'exit', 'q', 'bye']:
-                print("👋 Take care! Let me know if you need anything else.")
+                print("👋 Take care!")
                 break
                 
             if not question:
@@ -330,27 +329,27 @@ def main():
             clinical_info = search_clinical_info(question, model, index, metadata)
             
             # Determine response method
-            use_conversational = should_use_conversational_api(question, clinical_info) and apis
+            use_direct = should_use_direct_api(question, clinical_info) and apis
             
-            if use_conversational:
-                response = get_conversational_response(question, clinical_info, apis, conversation_history)
-                method = "Conversational"
+            if use_direct:
+                response = get_direct_response(question, clinical_info, apis, conversation_history)
+                method = "Direct"
             else:
-                response = get_fast_conversational_response(question, clinical_info, conversation_history)
+                response = get_fast_direct_response(question, clinical_info, conversation_history)
                 method = "Fast"
             
             end_time = time.time()
             
-            print(f"👨‍⚕️  Me ({end_time - start_time:.1f}s): {response}")
+            print(f"🤖 Me ({end_time - start_time:.1f}s): {response}")
             print()
             
             # Store conversation
             conversation_history.append({"question": question, "response": response})
-            if len(conversation_history) > 5:
+            if len(conversation_history) > 3:  # Keep less history
                 conversation_history.pop(0)
             
         except KeyboardInterrupt:
-            print("\n👋 Take care! Let me know if you need anything else.")
+            print("\n👋 Take care!")
             break
         except Exception as e:
             print(f"❌ Oops, something went wrong: {e}")

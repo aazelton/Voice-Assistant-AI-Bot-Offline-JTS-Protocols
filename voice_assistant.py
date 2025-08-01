@@ -233,22 +233,29 @@ class VoiceAssistant:
         try:
             # Build prompt with context
             if context:
-                prompt = f"""[CONTEXT START]
+                prompt = f"""You are an experienced trauma provider giving quick, direct advice. Be concise but conversational. Give actionable answers in 1-2 sentences.
+
+[CONTEXT START]
 {context}
 [CONTEXT END]
 
 Question: {query}
-Answer:"""
+
+Answer with direct, actionable advice:"""
             else:
-                prompt = f"Question: {query}\nAnswer:"
+                prompt = f"""You are an experienced trauma provider giving quick, direct advice. Be concise but conversational.
+
+Question: {query}
+
+Answer with direct, actionable advice:"""
             
             # Generate response
             response = self.llm(
                 prompt,
-                max_tokens=LLM_MAX_TOKENS,
-                temperature=LLM_TEMPERATURE,
-                top_p=LLM_TOP_P,
-                stop=["\n\n", "Question:", "Context:"]
+                max_tokens=100,  # Shorter responses for voice
+                temperature=0.3,  # More focused
+                top_p=0.9,
+                stop=["\n\n", "Question:", "Context:", "Answer:"]
             )
             
             answer = response["choices"][0]["text"].strip()
