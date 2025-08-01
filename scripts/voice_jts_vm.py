@@ -885,7 +885,7 @@ def test_jts_access():
         
         # Simple test query
         test_question = "ketamine RSI"
-        result = query_jts_rest_api_ssh(test_question)
+        result = query_jts_rest_api(test_question)
         
         if result and len(result.strip()) > 10:
             print("✅ JTS database access successful")
@@ -995,13 +995,13 @@ def main():
             if vm_connected and ('protocol' in question.lower() or 'guideline' in question.lower() or final_drug):
                 print("🔍 Querying JTS knowledge base on VM...")
                 
-                # Try REST API via SSH first (fastest), then fallback to other methods
-                jts_response = query_jts_rest_api_ssh(question)
+                # Try direct REST API first (fastest), then fallback to SSH methods
+                jts_response = query_jts_rest_api(question)
                 if not jts_response:
-                    print("REST API SSH failed, trying direct REST API...")
-                    jts_response = query_jts_rest_api(question)
+                    print("Direct REST API failed, trying REST API via SSH...")
+                    jts_response = query_jts_rest_api_ssh(question)
                 if not jts_response:
-                    print("Direct REST API failed, trying SSH methods...")
+                    print("REST API SSH failed, trying SSH methods...")
                     jts_response = query_jts_vm_fast(question)
                 if not jts_response:
                     print("Fast SSH method failed, trying simple method...")
