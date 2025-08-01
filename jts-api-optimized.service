@@ -1,0 +1,18 @@
+[Unit]
+Description=Optimized JTS REST API Service
+After=network.target
+
+[Service]
+Type=simple
+User=akaclinicalco
+WorkingDirectory=/home/akaclinicalco/Voice-Assistant-AI-Bot-Offline-JTS-Protocols
+Environment=PATH=/home/akaclinicalco/Voice-Assistant-AI-Bot-Offline-JTS-Protocols/venv/bin
+ExecStart=/home/akaclinicalco/Voice-Assistant-AI-Bot-Offline-JTS-Protocols/venv/bin/python3 /home/akaclinicalco/jts_service_optimized.py
+Restart=always
+RestartSec=10
+# Resource limits
+MemoryMax=8G
+CPUQuota=200%  # Limit to 2 CPU cores
+
+[Install]
+WantedBy=multi-user.target 
