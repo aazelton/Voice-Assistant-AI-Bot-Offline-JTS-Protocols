@@ -29,7 +29,7 @@ except ImportError:
 
 # VM Configuration
 VM_CONFIG = {
-    'hostname': '34.45.48.120',
+    'hostname': '34.69.34.151',
     'username': 'akaclinicalco',
     'port': 22,
     'timeout': 10
@@ -542,7 +542,7 @@ def query_jts_rest_api(question):
         print(f"🔍 Querying JTS knowledge base via REST API...")
         
         # Make request to the REST API
-        url = "http://34.45.48.120:5000/query"
+        url = "http://34.69.34.151:5000/query"
         data = {"question": question}
         
         response = requests.post(url, json=data, timeout=30)

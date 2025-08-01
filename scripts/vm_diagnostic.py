@@ -9,7 +9,7 @@ import os
 
 # VM Configuration
 VM_CONFIG = {
-    'hostname': '34.45.48.120',
+    'hostname': '34.69.34.151',
     'username': 'akaclinicalco',
     'port': 22,
     'timeout': 10

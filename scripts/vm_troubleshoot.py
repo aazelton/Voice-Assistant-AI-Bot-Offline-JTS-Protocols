@@ -169,7 +169,7 @@ def main():
     print("=" * 50)
     
     # Get VM details
-    vm_host = input("Enter VM IP address (default: 34.45.48.120): ").strip() or "34.45.48.120"
+    vm_host = input("Enter VM IP address (default: 34.69.34.151): ").strip() or "34.69.34.151"
     vm_user = input("Enter VM username (default: akaclinicalco): ").strip() or "akaclinicalco"
     
     print(f"\n🔍 Testing VM: {vm_user}@{vm_host}")

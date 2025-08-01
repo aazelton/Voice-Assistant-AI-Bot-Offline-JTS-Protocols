@@ -11,7 +11,7 @@ def check_vm_status():
     print("🔍 VM STATUS CHECK")
     print("=" * 40)
     
-    vm_ip = "34.45.48.120"
+    vm_ip = "34.69.34.151"
     vm_user = "akaclinicalco"
     
     print(f"Testing VM: {vm_user}@{vm_ip}")

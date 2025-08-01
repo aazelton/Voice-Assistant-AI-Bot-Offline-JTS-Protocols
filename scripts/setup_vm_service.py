@@ -9,7 +9,7 @@ import os
 
 # VM Configuration
 VM_CONFIG = {
-    'hostname': '34.45.48.120',
+    'hostname': '34.69.34.151',
     'username': 'akaclinicalco',
     'port': 22,
     'timeout': 10
@@ -169,8 +169,8 @@ WantedBy=multi-user.target
         
         if result.returncode == 0:
             print("✅ JTS REST API service installed and started successfully!")
-            print("Service will be available at: http://34.45.48.120:5000")
-            print("Health check: http://34.45.48.120:5000/health")
+            print("Service will be available at: http://34.69.34.151:5000")
+            print("Health check: http://34.69.34.151:5000/health")
         else:
             print(f"❌ Service installation failed: {result.stderr}")
             
@@ -183,7 +183,7 @@ def test_service():
         print("🧪 Testing JTS REST API service...")
         
         # Test health endpoint
-        health_cmd = "curl -s http://34.45.48.120:5000/health"
+        health_cmd = "curl -s http://34.69.34.151:5000/health"
         result = subprocess.run(health_cmd, shell=True, capture_output=True, text=True, timeout=30)
         
         if result.returncode == 0:
@@ -191,7 +191,7 @@ def test_service():
             print(result.stdout)
             
             # Test query endpoint
-            query_cmd = 'curl -s -X POST http://34.45.48.120:5000/query -H "Content-Type: application/json" -d \'{"question": "ketamine RSI"}\''
+            query_cmd = 'curl -s -X POST http://34.69.34.151:5000/query -H "Content-Type: application/json" -d \'{"question": "ketamine RSI"}\''
             result = subprocess.run(query_cmd, shell=True, capture_output=True, text=True, timeout=30)
             
             if result.returncode == 0:

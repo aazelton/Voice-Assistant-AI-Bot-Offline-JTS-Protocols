@@ -9,7 +9,7 @@ import os
 
 # VM Configuration
 VM_CONFIG = {
-    'hostname': '34.45.48.120',
+    'hostname': '34.69.34.151',
     'username': 'akaclinicalco',
     'port': 22,
     'timeout': 10
@@ -174,8 +174,8 @@ WantedBy=multi-user.target
         
         if result.returncode == 0:
             print("✅ Optimized JTS REST API service installed and started successfully!")
-            print("Service will be available at: http://34.45.48.120:5000")
-            print("Health check: http://34.45.48.120:5000/health")
+            print("Service will be available at: http://34.69.34.151:5000")
+            print("Health check: http://34.69.34.151:5000/health")
             print("Resource limits: 8GB RAM, 2 CPU cores")
         else:
             print(f"❌ Optimized service installation failed: {result.stderr}")
@@ -257,7 +257,7 @@ def main():
         print("1. Access VM via Google Cloud Console")
         print("2. Run: sudo systemctl status jts-api-optimized")
         print("3. Run: ./configure_firewall.sh")
-        print("4. Test: curl http://34.45.48.120:5000/health")
+        print("4. Test: curl http://34.69.34.151:5000/health")
         print("5. Run voice assistant: python3 scripts/voice_jts_vm.py")
         
     except Exception as e:
